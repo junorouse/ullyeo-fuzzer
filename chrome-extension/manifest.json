@@ -1,0 +1,25 @@
+{
+    "name": "Dynamic Fuzzer",
+    "version": "1.0",
+    "description": "Dynamic Fuzzer.",
+    "short_name": "DF",
+    "author": "Juno Im",
+    "homepage_url": "http://bof.kr",
+    "background": {
+        "scripts": [
+            "capture.js"
+        ]
+    },
+    "browser_action": {
+        "default_icon": {
+        },
+        "default_title": "Dynamic Fuzzer"
+    },
+    "permissions": [
+        "tabs",
+        "webRequest",
+        "webRequestBlocking",
+        "*://*/*"
+    ],
+    "manifest_version": 2
+}
