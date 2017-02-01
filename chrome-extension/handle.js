@@ -3,7 +3,7 @@ function connect() {
  if (socket != 0 && socket.readyState != 1)
   return;
 
- socket = new WebSocket('ws://localhost:8765');
+ socket = new WebSocket('ws://localhost:8787');
  socket.onopen = function() {
  };
  socket.onerror = function(error) {

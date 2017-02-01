@@ -55,10 +55,10 @@ class WebSocketServer(object):
         client.send(r)
 
     def handle_client (self, client, addr):
-        handshake(client)
+        self.handshake(client)
         try:
             while 1:
-                opcode, data = recv(client)
+                opcode, data = self.recv(client)
                 if opcode == 0x8:
                     print 'close frame received'
                     break
@@ -66,7 +66,7 @@ class WebSocketServer(object):
                     if len(data) == 0:
                         break
                     msg = data.decode('utf-8', 'ignore')
-                    send(client, msg)
+                    self.send(client, msg)
                     print msg
                 else:
                     print 'frame not handled : opcode=' + str(opcode) + ' len=' + str(len(data))
@@ -85,4 +85,4 @@ class WebSocketServer(object):
             print 'Waiting for connection on port ' + str(port) + ' ...'
             client, addr = sock.accept()
             print 'Connection from: ' + str(addr)
-            threading.Thread(target = handle_client, args = (client, addr)).start()
+            threading.Thread(target = self.handle_client, args = (client, addr)).start()
