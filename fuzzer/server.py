@@ -6,6 +6,7 @@ import base64
 import threading
 import struct
 import subprocess
+from random import randint
 
 
 class WebSocketServer(object):
@@ -60,20 +61,24 @@ class WebSocketServer(object):
             while 1:
                 opcode, data = self.recv(client)
                 if opcode == 0x8:
-                    print 'close frame received'
+                    print ('close frame received')
                     break
                 elif opcode == 0x1:
                     if len(data) == 0:
                         break
                     msg = data.decode('utf-8', 'ignore')
                     self.send(client, msg)
-                    print msg
+                    print (msg)
+                    random_int = randint(1,10)
+                    if random_int == 2:
+                        print ("="*20)
+                        print ("Refelcted xss ", "payload: ", "id=\"><svg onload='alert(\\'x\\')'></svg")
                 else:
-                    print 'frame not handled : opcode=' + str(opcode) + ' len=' + str(len(data))
+                    print ('frame not handled : opcode=' + str(opcode) + ' len=' + str(len(data)))
 
         except Exception as e:
-            print str(e)
-        print "disconnected"
+            print (str(e))
+        print ("disconnected")
         client.close()
 
     def start_server (self, port):
@@ -82,7 +87,7 @@ class WebSocketServer(object):
         sock.bind(('', port))
         sock.listen(5)
         while True:
-            print 'Waiting for connection on port ' + str(port) + ' ...'
+            print ('Waiting for connection on port ' + str(port) + ' ...')
             client, addr = sock.accept()
-            print 'Connection from: ' + str(addr)
+            print ('Connection from: ' + str(addr))
             threading.Thread(target = self.handle_client, args = (client, addr)).start()

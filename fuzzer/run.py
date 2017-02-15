@@ -1,8 +1,9 @@
 from server import WebSocketServer
 
 """
-TODO: Make handle function.
+TODO: Make handler.
 """
+
 
 if __name__ == '__main__':
     ws = WebSocketServer()
