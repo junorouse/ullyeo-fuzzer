@@ -1,11 +1,8 @@
-from server import WebSocketServer
-from ullyeo import parser
-
-"""
-TODO: Make handler.
-"""
+from SimpleWebSocketServer import SimpleWebSocketServer
+from ullyeo import parser, handler
 
 
 if __name__ == '__main__':
-    ws = WebSocketServer()
-    ws.start_server(8787)
+    port = 8787
+    server = SimpleWebSocketServer('', port, handler.BaseHandler)
+    server.serveforever()
