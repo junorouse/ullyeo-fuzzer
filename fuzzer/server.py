@@ -8,6 +8,9 @@ import struct
 import subprocess
 from random import randint
 
+from handler import ExampleHandler
+from ullyeo.parser import *
+
 
 class WebSocketServer(object):
     def send(self, client, msg):
@@ -68,7 +71,12 @@ class WebSocketServer(object):
                         break
                     msg = data.decode('utf-8', 'ignore')
                     self.send(client, msg)
+
+                    # handling the packets.
+
+                    ExampleHandler(msg)
                     print (msg)
+
                     random_int = randint(1,10)
                     if random_int == 2:
                         print ("="*20)
