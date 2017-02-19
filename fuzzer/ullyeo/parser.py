@@ -10,3 +10,5 @@ class BaseParser(object):
         self.tmp = loads(detail)
         self.detail = self.tmp['Details']
         self.type = self.tmp['Type']
+        self.url = self.detail['url']
+        self.method = self.detail['method']
