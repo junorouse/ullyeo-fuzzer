@@ -122,9 +122,12 @@ class BaseHandler(WebSocket):
             exit(0)
 
     def handle_modules(self, k):
-        p = get(k['url']).content
-        print (p[:10])
-        self.hello()
+        print ("="*20)
+        print (k['url'])
+        print(k['method'])
+        print(k['request_body'])
+        print(k['request_header'])
+        print(k['response_header'])
         return
 
     def hello(self):
