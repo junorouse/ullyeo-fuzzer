@@ -39,7 +39,7 @@ class Request(Base):
         self.response_header = response_header
 
     def __repr__(self):
-        return "<Request('%d', '%d', '%d')>" % (self.fuzzing_id, self.fuzzing_id, self.request_id)
+        return "<Request('%s', '%s', '%s', '%s')>" % (self.fuzzing_id, self.fuzzing_id, int(self.status), self.request_id)
 
 
 class Module(Base):
@@ -55,3 +55,7 @@ class AttackSuccess(Base):
     request = relationship('Request', foreign_keys=[request_id])
     module_id = Column(Integer, ForeignKey('modules.id'))
     module = relationship('Module', foreign_keys=[module_id])
+
+    def __init__(self, request_id, module_id):
+        self.request_id=request_id
+        self.module_id=module_id
