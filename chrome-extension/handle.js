@@ -28,18 +28,15 @@ chrome.runtime.onConnect.addListener(function(port) {
   port.onMessage.addListener(function(Message) {
     /*
       requiest id
+      Type : Request
     */
 
-    if (Message.Type == "SendHeaders" || Message.Type == "Completed") {
-      var url = Message.Details.url;
-      var method = Message.Details.method;
+    var url = Message.Details.url;
+    var method = Message.Details.method;
 
-      if (url.indexOf('?') != -1) {
-        var msg = method + ' ' + url;
-        // document.getElementById('log').innerHTML += msg + '<br />';
-        socket.send(JSON.stringify(Message));
-      }
-    }
+    var msg = method + ' ' + url;
+    // document.getElementById('log').innerHTML += msg + '<br />';
+    socket.send(JSON.stringify(Message));
   });
 });
 
