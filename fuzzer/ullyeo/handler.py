@@ -1,5 +1,8 @@
 from pprint import pprint
 
+import threading
+from requests import get, post
+
 from SimpleWebSocketServer import WebSocket
 from .parser import BaseParser
 from .models import Request
@@ -18,7 +21,7 @@ class BaseHandler(WebSocket):
             request_method = request.method
             request_id = request.id
 
-            s = Session()
+            self.s = Session()
             if request_type == 'Request':
                 # do request
                 request_body = ''
@@ -28,8 +31,8 @@ class BaseHandler(WebSocket):
                     pass
                 finally:
                     r = Request(1, request_id, request_url, request_method, request_body=request_body)
-                    s.add(r)
-                    s.commit()
+                    self.s.add(r)
+                    self.s.commit()
             elif request_type == 'SendHeaders':
                 # do send headers
                 # filter by fuzzing id
@@ -40,8 +43,8 @@ class BaseHandler(WebSocket):
                     pass
                 finally:
                     r = Request(1, request_id, request_url, request_method, status=1, request_header=request_headers)
-                    s.add(r)
-                    s.commit()
+                    self.s.add(r)
+                    self.s.commit()
             elif request_type == 'Received':
                 # do received
                 # response_headers = request.detail['responseHeaders']
@@ -58,12 +61,18 @@ class BaseHandler(WebSocket):
                     pass
                 finally:
                     r = Request(1, request_id, request_url, request_method, status=4, response_header=response_headers)
-                    s.add(r)
-                    s.commit()
+                    self.s.add(r)
+                    self.s.commit()
+                    k = self.s.query(Request).filter_by(request_id=request_id).order_by(Request.status).all()
+                    th = threading.Thread(target=self.handle_modules, args=(k,))
+                    th.start()
         except Exception as e:
             print (e)
             exit(0)
 
+    def handle_modules(self, k):
+        print (k)
+        return
 
     def handleConnected(self):
         print(self.address, 'connected')
