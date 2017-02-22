@@ -4,7 +4,7 @@ import threading
 import linecache
 import sys
 
-from requests import get, post
+import importlib
 from json import dumps, loads, JSONEncoder
 
 from SimpleWebSocketServer import WebSocket
@@ -122,12 +122,21 @@ class BaseHandler(WebSocket):
             exit(0)
 
     def handle_modules(self, k):
-        print ("="*20)
-        print (k['url'])
-        print(k['method'])
-        print(k['request_body'])
-        print(k['request_header'])
-        print(k['response_header'])
+        import config
+        module_list = []
+        for ml in config.MODULE_LIST:
+            tmp = importlib.import_module('modules.'+ml)
+            result = tmp.go(k)
+            if result:
+                # add success attack
+                pass
+
+        # print ("="*20)
+        # print (k['url'])
+        # print(k['method'])
+        # print(k['request_body'])
+        # print(k['request_header'])
+        # print(k['response_header'])
         return
 
     def hello(self):
