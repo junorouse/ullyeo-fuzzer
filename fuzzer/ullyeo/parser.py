@@ -9,7 +9,7 @@ class BaseParser(object):
         detail -- chrome request's detail parrt (default "")
         """
         self.tmp = loads(detail)
-        self.type = self.tmp['Type'] # Request, Completed
+        self.type = self.tmp['Type']  # Request, Completed
         self.detail = self.tmp['Details']
         self.id = self.detail['requestId']
         self.url = self.detail['url']
