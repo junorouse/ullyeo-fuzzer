@@ -16,3 +16,5 @@ if __name__ == '__main__':
 
     server = SimpleWebSocketServer('', port, handler.BaseHandler)
     server.serveforever()
+
+    print("BYE")
