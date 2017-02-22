@@ -17,7 +17,7 @@ class Request(Base):
     id = Column(Integer, primary_key=True)
     fuzzing_id = Column(Integer, ForeignKey("fuzzings.id"))
     fuzzing = relationship("Fuzzing", foreign_keys=[fuzzing_id])
-    
+
     request_id = Column(Integer,)
 
     method = Column(String,)
@@ -27,7 +27,7 @@ class Request(Base):
     request_body = Column(String,)
 
     status = Column(Integer, default=0)
-    
+
     def __init__(self, fuzzing_id, request_id, url, method, status=0, request_body='', request_header='', response_header=''):
         self.fuzzing_id = fuzzing_id
         self.request_id = request_id
@@ -57,5 +57,5 @@ class AttackSuccess(Base):
     module = relationship('Module', foreign_keys=[module_id])
 
     def __init__(self, request_id, module_id):
-        self.request_id=request_id
-        self.module_id=module_id
+        self.request_id = request_id
+        self.module_id = module_id

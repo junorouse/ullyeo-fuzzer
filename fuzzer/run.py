@@ -1,7 +1,7 @@
 from SimpleWebSocketServer import SimpleWebSocketServer
-from ullyeo import parser, handler
+from ullyeo import handler
 from ullyeo.db import engine, Session
-from ullyeo.models import *
+from ullyeo.models import Base, Fuzzing, Module
 
 
 if __name__ == '__main__':

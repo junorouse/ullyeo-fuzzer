@@ -1,7 +1,5 @@
 from time import time
-from requests import get, post
-from ullyeo.models import Request, AttackSuccess
-from json import *
+from requests import get
 
 from urllib.parse import urlparse, parse_qs
 
@@ -14,7 +12,7 @@ def go(k):
         query['pw'] = ' || sleep(1)#'
         query['id'] = '\\'
         a1 = time()
-        c = get(url, params=query)
+        get(url, params=query)
         a2 = time()
         if a2 - a1 >= 1:
             return True

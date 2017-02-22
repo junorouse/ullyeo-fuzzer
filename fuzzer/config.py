@@ -1,4 +1,4 @@
-from ullyeo.models import *
+from ullyeo.models import Base
 from ullyeo.db import engine
 
 MODULE_LIST = [

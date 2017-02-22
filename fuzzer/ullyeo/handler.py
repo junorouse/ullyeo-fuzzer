@@ -1,5 +1,3 @@
-from pprint import pprint
-
 import threading
 import linecache
 import sys
@@ -7,13 +5,13 @@ import sys
 import importlib
 from json import dumps, loads, JSONEncoder
 
+from sqlalchemy.ext.declarative import DeclarativeMeta
 from SimpleWebSocketServer import WebSocket
-from .parser import BaseParser
-from .models import Request, AttackSuccess
+from ullyeo.parser import BaseParser
 
 from ullyeo.db import Session
-from ullyeo.models import Request
-from .tmp import request_list
+from ullyeo.models import Request, AttackSuccess
+from ullyeo.tmp import request_list
 
 
 def PrintException():
@@ -23,26 +21,26 @@ def PrintException():
     filename = f.f_code.co_filename
     linecache.checkcache(filename)
     line = linecache.getline(filename, lineno, f.f_globals)
-    print ('EXCEPTION IN ({}, LINE {} "{}"): {}'.format(filename, lineno, line.strip(), exc_obj))
+    print('EXCEPTION IN ({}, LINE {} "{}"): {}'.format(
+        filename, lineno, line.strip(), exc_obj)
+    )
 
 
-from sqlalchemy.ext.declarative import DeclarativeMeta
 class AlchemyEncoder(JSONEncoder):
     def default(self, obj):
         if isinstance(obj.__class__, DeclarativeMeta):
-            # an SQLAlchemy class
             fields = {}
             for field in [x for x in dir(obj) if not x.startswith('_') and x != 'metadata']:
                 data = obj.__getattribute__(field)
                 try:
-                    dumps(data) # this will fail on non-encodable values, like other classes
+                    dumps(data)
                     fields[field] = data
                 except TypeError:
                     fields[field] = None
-            # a json-encodable dict
             return fields
 
         return JSONEncoder.default(self, obj)
+
 
 class BaseHandler(WebSocket):
     def handleMessage(self):
@@ -123,12 +121,10 @@ class BaseHandler(WebSocket):
 
     def handle_modules(self, k):
         import config
-        module_list = []
         for ml in config.MODULE_LIST:
             tmp = importlib.import_module('modules.'+ml)
             result = tmp.go(k)
             if result:
-                print ("good132323")
                 r = Request(
                     fuzzing_id=1,
                     request_id=1,
@@ -140,7 +136,7 @@ class BaseHandler(WebSocket):
                     response_header=k['response_header'],
                 )
                 self.s.add(r)
-                w = AttackSuccess(1,1)
+                w = AttackSuccess(1, 1)
                 self.s.add(w)
                 self.s.commit()
                 pass
@@ -152,9 +148,6 @@ class BaseHandler(WebSocket):
         # print(k['request_header'])
         # print(k['response_header'])
         return
-
-    def hello(self):
-        print ('hello')
 
     def handleConnected(self):
         print(self.address, 'connected')
