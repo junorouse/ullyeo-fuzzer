@@ -9,7 +9,7 @@ from json import dumps, loads, JSONEncoder
 
 from SimpleWebSocketServer import WebSocket
 from .parser import BaseParser
-from .models import Request
+from .models import Request, AttackSuccess
 
 from ullyeo.db import Session
 from ullyeo.models import Request
@@ -128,7 +128,21 @@ class BaseHandler(WebSocket):
             tmp = importlib.import_module('modules.'+ml)
             result = tmp.go(k)
             if result:
-                # add success attack
+                print ("good132323")
+                r = Request(
+                    fuzzing_id=1,
+                    request_id=1,
+                    url=k['url'],
+                    method=k['method'],
+                    status=4,
+                    request_body=k['request_body'],
+                    request_header=k['request_header'],
+                    response_header=k['response_header'],
+                )
+                self.s.add(r)
+                w = AttackSuccess(1,1)
+                self.s.add(w)
+                self.s.commit()
                 pass
 
         # print ("="*20)

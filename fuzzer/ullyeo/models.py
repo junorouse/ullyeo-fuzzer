@@ -55,3 +55,7 @@ class AttackSuccess(Base):
     request = relationship('Request', foreign_keys=[request_id])
     module_id = Column(Integer, ForeignKey('modules.id'))
     module = relationship('Module', foreign_keys=[module_id])
+
+    def __init__(self, request_id, module_id):
+        self.request_id=request_id
+        self.module_id=module_id
