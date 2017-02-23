@@ -121,10 +121,11 @@ class BaseHandler(WebSocket):
 
     def handle_modules(self, k):
         import config
+        is_already_add_request = False
         for ml in config.MODULE_LIST:
             tmp = importlib.import_module('modules.'+ml)
             result = tmp.go(k)
-            if len(result) >= 1:
+            if not is_already_add_request and len(result) >= 1:
                 r = Request(
                     fuzzing_id=1,
                     request_id=1,
@@ -136,6 +137,7 @@ class BaseHandler(WebSocket):
                     response_header=k['response_header'],
                 )
                 self.s.add(r)
+                is_already_add_request = True
             for success in result:
                 """
                 attcksuccess(request_id, module_id, request_payload)
