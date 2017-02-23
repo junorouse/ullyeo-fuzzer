@@ -56,6 +56,17 @@ class AttackSuccess(Base):
     module_id = Column(Integer, ForeignKey('modules.id'))
     module = relationship('Module', foreign_keys=[module_id])
 
-    def __init__(self, request_id, module_id):
+    """
+    payload
+    {
+        a.request.url
+        a.request.headers
+        a.request.body
+    }
+    """
+    payload = Column(String)
+
+    def __init__(self, request_id, module_id, payload):
         self.request_id = request_id
         self.module_id = module_id
+        self.payload = payload

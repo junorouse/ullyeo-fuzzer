@@ -124,7 +124,7 @@ class BaseHandler(WebSocket):
         for ml in config.MODULE_LIST:
             tmp = importlib.import_module('modules.'+ml)
             result = tmp.go(k)
-            if result:
+            if len(result) >= 1:
                 r = Request(
                     fuzzing_id=1,
                     request_id=1,
@@ -136,17 +136,13 @@ class BaseHandler(WebSocket):
                     response_header=k['response_header'],
                 )
                 self.s.add(r)
-                w = AttackSuccess(1, 1)
+            for success in result:
+                """
+                attcksuccess(request_id, module_id, request_payload)
+                """
+                w = AttackSuccess(1, 1, success)
                 self.s.add(w)
-                self.s.commit()
-                pass
-
-        # print ("="*20)
-        # print (k['url'])
-        # print(k['method'])
-        # print(k['request_body'])
-        # print(k['request_header'])
-        # print(k['response_header'])
+            self.s.commit()
         return
 
     def handleConnected(self):
