@@ -14,7 +14,7 @@ from ullyeo.models import Request, AttackSuccess
 from ullyeo.tmp import request_list
 
 
-def PrintException():
+def print_exception():
     exc_type, exc_obj, tb = sys.exc_info()
     f = tb.tb_frame
     lineno = tb.tb_lineno
@@ -116,7 +116,7 @@ class BaseHandler(WebSocket):
                     th = threading.Thread(target=self.handle_modules, args=(loads(request_list.pop(request_id)),))
                     th.start()
         except Exception as e:
-            PrintException()
+            print_exception()
             exit(0)
 
     def handle_modules(self, k):
