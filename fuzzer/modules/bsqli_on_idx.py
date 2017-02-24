@@ -24,7 +24,8 @@ def go(web_request):
         if a2 - a1 >= 2:
             tmp = {}
             tmp['url'] = url
-            # tmp['headers'] = r.request.headers.__str__
+            tmp['method'] = web_request['method']
+            tmp['query'] = query
             tmp['body'] = query
             result.append(dumps(tmp))
         query[k] = tmp_value
