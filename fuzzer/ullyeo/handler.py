@@ -14,7 +14,7 @@ from ullyeo.models import Request, AttackSuccess
 from ullyeo.tmp import request_list
 
 
-def PrintException():
+def print_exception():
     exc_type, exc_obj, tb = sys.exc_info()
     f = tb.tb_frame
     lineno = tb.tb_lineno
@@ -116,15 +116,16 @@ class BaseHandler(WebSocket):
                     th = threading.Thread(target=self.handle_modules, args=(loads(request_list.pop(request_id)),))
                     th.start()
         except Exception as e:
-            PrintException()
+            print_exception()
             exit(0)
 
     def handle_modules(self, k):
         import config
+        is_already_add_request = False
         for ml in config.MODULE_LIST:
             tmp = importlib.import_module('modules.'+ml)
             result = tmp.go(k)
-            if result:
+            if not is_already_add_request and len(result) >= 1:
                 r = Request(
                     fuzzing_id=1,
                     request_id=1,
@@ -136,17 +137,14 @@ class BaseHandler(WebSocket):
                     response_header=k['response_header'],
                 )
                 self.s.add(r)
-                w = AttackSuccess(1, 1)
+                is_already_add_request = True
+            for success in result:
+                """
+                attcksuccess(request_id, module_id, request_payload)
+                """
+                w = AttackSuccess(1, 1, success)
                 self.s.add(w)
-                self.s.commit()
-                pass
-
-        # print ("="*20)
-        # print (k['url'])
-        # print(k['method'])
-        # print(k['request_body'])
-        # print(k['request_header'])
-        # print(k['response_header'])
+            self.s.commit()
         return
 
     def handleConnected(self):

