@@ -1,24 +1,32 @@
-from SimpleWebSocketServer import SimpleWebSocketServer
-from ullyeo import handler
-from ullyeo.db import engine, Session
-from ullyeo.models import Base, Fuzzing, Module
+from pprint import pprint
+from flask import Flask
+from flask_socketio import SocketIO
 
+from json import loads
+
+app = Flask(__name__)
+ws = SocketIO(app)
+port = 8787
+
+
+@app.route('/')
+def main():
+    return 'hello'
+
+
+@ws.on('connect')
+def connect():
+    pass
+
+
+@ws.on('disconnect')
+def disconnect():
+    pass
+
+
+@ws.on("request")
+def request(message):
+    pprint(loads(message))
 
 if __name__ == '__main__':
-    Base.metadata.create_all(engine)
-
-    port = 8787
-    f = Fuzzing()
-    m = Module()
-    m.id = 1
-    m.name = "bsqli on idx"
-
-    s = Session()
-    s.add(f)
-    s.add(m)
-    s.commit()
-
-    server = SimpleWebSocketServer('', port, handler.BaseHandler)
-    server.serveforever()
-
-    print("BYE")
+    ws.run(app, port=port)
