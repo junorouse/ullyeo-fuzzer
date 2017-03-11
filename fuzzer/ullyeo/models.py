@@ -12,6 +12,9 @@ class Fuzzing(db.Model):
 class Request(db.Model):
     __tablename__ = 'requests'
     id = db.Column(db.Integer, primary_key=True)
+    pid = db.Column(db.Integer)
+    module_id = db.Column(db.Integer, db.ForeignKey('modules.id'))
+    module = db.relationship('Module', foreign_keys=[module_id])
     fuzzing_id = db.Column(db.Integer, db.ForeignKey("fuzzings.id"))
     fuzzing = db.relationship("Fuzzing", foreign_keys=[fuzzing_id])
 
