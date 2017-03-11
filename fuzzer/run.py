@@ -1,24 +1,6 @@
-from SimpleWebSocketServer import SimpleWebSocketServer
-from ullyeo import handler
-from ullyeo.db import engine, Session
-from ullyeo.models import Base, Fuzzing, Module
-
+from ullyeo.handling_app import app, ws, db
+from ullyeo.models import *
 
 if __name__ == '__main__':
-    Base.metadata.create_all(engine)
-
-    port = 8787
-    f = Fuzzing()
-    m = Module()
-    m.id = 1
-    m.name = "bsqli on idx"
-
-    s = Session()
-    s.add(f)
-    s.add(m)
-    s.commit()
-
-    server = SimpleWebSocketServer('', port, handler.BaseHandler)
-    server.serveforever()
-
-    print("BYE")
+    db.create_all()
+    ws.run(app, port=8787)
