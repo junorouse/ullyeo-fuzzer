@@ -1,32 +1,6 @@
-from pprint import pprint
-from flask import Flask
-from flask_socketio import SocketIO
-
-from json import loads
-
-app = Flask(__name__)
-ws = SocketIO(app)
-port = 8787
-
-
-@app.route('/')
-def main():
-    return 'hello'
-
-
-@ws.on('connect')
-def connect():
-    pass
-
-
-@ws.on('disconnect')
-def disconnect():
-    pass
-
-
-@ws.on("request")
-def request(message):
-    pprint(loads(message))
+from ullyeo.handling_app import app, ws, db
+from ullyeo.models import *
 
 if __name__ == '__main__':
-    ws.run(app, port=port)
+    db.create_all()
+    ws.run(app, port=8787)
