@@ -25,7 +25,8 @@ class Request(db.Model):
 
     status = db.Column(db.Integer, default=0)
 
-    def __init__(self, fuzzing_id, request_id, url, method, status=0, request_body='', request_header='', response_header=''):
+    def __init__(self, fuzzing_id, request_id, url, method, status=0,
+                 request_body='', request_header='', response_header=''):
         self.fuzzing_id = fuzzing_id
         self.request_id = request_id
         self.url = url
@@ -36,7 +37,9 @@ class Request(db.Model):
         self.response_header = response_header
 
     def __repr__(self):
-        return "<Request('%s', '%s', '%s', '%s')>" % (self.fuzzing_id, self.fuzzing_id, int(self.status), self.request_id)
+        return "<Request('%s', '%s', '%s', '%s')>" %\
+               (self.fuzzing_id, self.fuzzing_id,
+                int(self.status), self.request_id)
 
 
 class Module(db.Model):
@@ -61,8 +64,10 @@ class AttackSuccess(db.Model):
     }
     """
     payload = db.Column(db.String)
+    response_data = db.Column(db.String)
 
-    def __init__(self, request_id, module_id, payload):
+    def __init__(self, request_id, module_id, payload, response_data):
         self.request_id = request_id
         self.module_id = module_id
         self.payload = payload
+        self.response_data = response_data  # status, headers, text

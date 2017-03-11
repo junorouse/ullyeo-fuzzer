@@ -5,12 +5,19 @@ from flask_socketio import SocketIO
 from flask_sqlalchemy import SQLAlchemy
 
 app = Flask(__name__)
-app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///databases/db'+str(int(time()))+'.sqlite3'
+app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///databases/db' +\
+                                        str(int(time())) + '.sqlite3'
 ws = SocketIO(app)
 db = SQLAlchemy(app)
 
+from .models import AttackSuccess
+
+
 @app.route('/')
 def main():
+    """
+    @TODO: implement graphic view
+    """
     return 'hello'
 
 
@@ -18,10 +25,19 @@ def main():
 def success():
     """
     post parm:
-    (json) request_data
+    (stringify json) payload
     (string) response_data
     (int) module_id
+    :return: None
     """
+    request_id = request.form['request_id']
+    module_id = request.form['module_id']
+    payload = request.form['payload']
+    response_data = request.form['response_data']
+    w = AttackSuccess(request_id=request_id, module_id=module_id,
+                      payload=payload, response_data=response_data)
+    db.session.add(w)
+    db.session.commit()
     return 'fuck'
 
 
