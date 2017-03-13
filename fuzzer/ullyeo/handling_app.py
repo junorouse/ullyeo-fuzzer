@@ -1,4 +1,5 @@
 from time import time
+from json import loads
 from pprint import pprint
 
 from flask import Flask, request
@@ -59,10 +60,4 @@ def ws_request(message):
     :return:
     """
     # TODO: attack by module
-    web_request = BaseParser(message)
-    type_filters = ['image', 'stylesheet', 'script']
-    for type_filter in type_filters:
-        if web_request.type == type_filter:
-            return False
-
-    pprint(web_request.detail)
+    pprint(loads(message))

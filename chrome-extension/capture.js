@@ -43,8 +43,6 @@ chrome.browserAction.onClicked.addListener(function() {
                             Details: details,
                             TabInfo: tab
                         });
-                        //This  {"frameId":0,"fromCache":true,"ip":"74.125.236.63","method":"GET","parentFrameId":-1,"requestId":"563","statusCode":200,"statusLine":"HTTP/1.1 200 OK","tabId":64,"timeStamp":1359389270317.956,"type":"image","url":"http://www.google.co.in/images/srpr/logo3w.png"} Web request is from this 64 tab and its details are{"active":true,"highlighted":true,"id":64,"incognito":false,"index":4,"pinned":false,"selected":true,"status":"loading","title":"Google","url":"http://www.google.co.in/","windowId":1}
-                        //console.log("This  " + JSON.stringify(details) + " Web request is from this " + tab.id + " tab and its details are" + JSON.stringify(tab));
                     });
 
                 } else {
