@@ -9,15 +9,9 @@ class BaseParser(object):
         detail -- chrome request's detail parrt (default "")
         """
         self.tmp = loads(detail)
-        self.type = self.tmp['Type']  # Request, Completed
+        self.r_type = self.tmp['Type']  # Request, Completed
         self.detail = self.tmp['Details']
         self.id = self.detail['requestId']
+        self.type = self.detail['type']
         self.url = self.detail['url']
         self.method = self.detail['method']
-
-        if self.type == 'Request':
-            # handle request headers
-            pass
-        elif self.type == 'Completed':
-            # handle response headers
-            pass

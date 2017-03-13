@@ -1,8 +1,11 @@
 from time import time
+from pprint import pprint
 
 from flask import Flask, request
 from flask_socketio import SocketIO
 from flask_sqlalchemy import SQLAlchemy
+
+from ullyeo.parser import BaseParser
 
 app = Flask(__name__)
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///databases/db' +\
@@ -15,9 +18,7 @@ from .models import AttackSuccess
 
 @app.route('/')
 def main():
-    """
-    @TODO: implement graphic view
-    """
+    # TODO: implement graphic view
     return 'hello'
 
 
@@ -53,4 +54,15 @@ def ws_disconnect():
 
 @ws.on("request")
 def ws_request(message):
-    print('request come')
+    """
+    :param message: chrome request object
+    :return:
+    """
+    # TODO: attack by module
+    web_request = BaseParser(message)
+    type_filters = ['image', 'stylesheet', 'script']
+    for type_filter in type_filters:
+        if web_request.type == type_filter:
+            return False
+
+    pprint(web_request.detail)
