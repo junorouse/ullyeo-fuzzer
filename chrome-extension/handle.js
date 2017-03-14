@@ -62,7 +62,6 @@ chrome.runtime.onConnect.addListener(function(port) {
         r[ri].hasOwnProperty('requestBody') &&
         r[ri].hasOwnProperty('method') &&
         r[ri].hasOwnProperty('url')) {
-          console.log(r[ri]);
           socket.emit("request", JSON.stringify(r[ri]));
           delete r[ri];
     }

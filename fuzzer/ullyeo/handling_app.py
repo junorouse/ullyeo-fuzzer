@@ -1,6 +1,7 @@
 from time import time
 from json import loads
 from pprint import pprint
+from urllib.parse import urlparse
 
 from flask import Flask, request
 from flask_socketio import SocketIO
@@ -62,7 +63,9 @@ def ws_request(message):
     """
     global sites
 
-    host = ''
+    r = loads(message)
+    url = urlparse(r['url'])
+    host = url.netloc
     try:
         assert sites.index(host) is not None
     except ValueError as e:
