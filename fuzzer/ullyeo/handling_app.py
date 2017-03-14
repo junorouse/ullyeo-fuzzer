@@ -5,8 +5,7 @@ from pprint import pprint
 from flask import Flask, request
 from flask_socketio import SocketIO
 from flask_sqlalchemy import SQLAlchemy
-
-from ullyeo.parser import BaseParser
+from sqlalchemy.exc import IntegrityError
 
 app = Flask(__name__)
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///databases/db' +\
@@ -14,7 +13,9 @@ app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///databases/db' +\
 ws = SocketIO(app)
 db = SQLAlchemy(app)
 
-from .models import AttackSuccess
+from .models import AttackSuccess, Site
+
+sites = []
 
 
 @app.route('/')
@@ -40,7 +41,7 @@ def success():
                       payload=payload, response_data=response_data)
     db.session.add(w)
     db.session.commit()
-    return 'fuck'
+    return '9ood'
 
 
 @ws.on('connect')
@@ -59,5 +60,19 @@ def ws_request(message):
     :param message: chrome request object
     :return:
     """
-    # TODO: attack by module
+    global sites
+
+    host = ''
+    try:
+        assert sites.index(host) is not None
+    except ValueError as e:
+        # attack
+        sites.append(host)
+        s = Site(host=host)
+        db.session.add(s)
+        try:
+            db.session.commit()
+        except IntegrityError:
+            pass
+
     pprint(loads(message))

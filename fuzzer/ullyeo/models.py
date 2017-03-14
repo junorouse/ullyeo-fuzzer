@@ -1,3 +1,5 @@
+from hashlib import sha1
+
 from .handling_app import db
 
 
@@ -74,3 +76,15 @@ class AttackSuccess(db.Model):
         self.module_id = module_id
         self.payload = payload
         self.response_data = response_data  # status, headers, text
+
+
+class Site(db.Model):
+    __tablename__ = 'sites'
+    hash = db.Column(db.String(20), primary_key=True, unique=True)
+    host = db.Column(db.String)
+
+    def __init__(self, host):
+        s = sha1()
+        s.update(host.encode("utf-8"))
+        self.hash = s.digest()
+        self.host = host
