@@ -1,4 +1,6 @@
 from time import time
+from base64 import b64encode
+from os import system
 from json import loads
 from pprint import pprint
 from urllib.parse import urlparse
@@ -75,6 +77,7 @@ def ws_request(message):
         db.session.add(s)
         try:
             db.session.commit()
+            system('python handling_module.py "%s" &' % (b64encode(message.encode("utf-8"))))
         except IntegrityError:
             pass
 
