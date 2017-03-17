@@ -38,10 +38,22 @@ def success():
     """
     request_id = request.form['request_id']
     module_id = request.form['module_id']
-    payload = request.form['payload']
-    response_data = request.form['response_data']
+    url = request.form['url']
+    r_type = request.form['r_type']
+    query = request.form['query']
+    body = request.form['body']
+    request_headers = request.form['request_headers']
+    response_headers = request.form['response_headers']
+    response_body = request.form['response_body']
+    response_status = request.form['response_status']
+
     w = AttackSuccess(request_id=request_id, module_id=module_id,
-                      payload=payload, response_data=response_data)
+                      url=url, r_type=r_type, query=query, body=body,
+                      request_headers=request_headers,
+                      response_headers=response_headers,
+                      response_body=response_body,
+                      response_status=response_status)
+    print(w)
     db.session.add(w)
     db.session.commit()
     return '9ood'

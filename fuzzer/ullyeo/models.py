@@ -60,22 +60,30 @@ class AttackSuccess(db.Model):
     request = db.relationship('Request', foreign_keys=[request_id])
     module_id = db.Column(db.Integer, db.ForeignKey('modules.id'))
     module = db.relationship('Module', foreign_keys=[module_id])
-    """
-    payload
-    {
-        a.request.url
-        a.request.headers
-        a.request.body
-    }
-    """
-    payload = db.Column(db.String)
-    response_data = db.Column(db.String)
 
-    def __init__(self, request_id, module_id, payload, response_data):
+    url = db.Column(db.String)
+    r_type = db.Column(db.String)
+    query = db.Column(db.String)
+    body = db.Column(db.String)
+    request_headers = db.Column(db.String)
+
+    response_headers = db.Column(db.String)
+    response_body = db.Column(db.String)
+    response_status = db.Column(db.Integer)
+
+    def __init__(self, request_id, module_id, url, r_type,
+                 query, body, request_headers, response_headers,
+                 response_body, response_status):
         self.request_id = request_id
         self.module_id = module_id
-        self.payload = payload
-        self.response_data = response_data  # status, headers, text
+        self.url = url
+        self.r_type = r_type
+        self.query = query
+        self.body = body
+        self.request_headers = request_headers
+        self.response_headers = response_headers
+        self.response_body = response_body
+        self.response_status = response_status
 
 
 class Site(db.Model):

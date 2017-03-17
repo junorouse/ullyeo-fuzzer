@@ -4,7 +4,7 @@ from base64 import b64decode
 import sys
 
 import gevent.monkey
-gevent.monkey.patch_socket()
+gevent.monkey.patch_all()
 import gevent
 
 import config
