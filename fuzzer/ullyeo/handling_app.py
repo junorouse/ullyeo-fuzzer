@@ -71,14 +71,14 @@ def ws_request(message):
     try:
         assert sites.index(host) is not None
     except ValueError as e:
-        # attack
+        # site attack
         sites.append(host)
         s = Site(host=host)
         db.session.add(s)
         try:
             db.session.commit()
-            system('python handling_module.py "%s" &' % (b64encode(message.encode("utf-8"))))
         except IntegrityError:
             pass
 
-    pprint(loads(message))
+    # module attack
+    system('python handling_module.py "%s" &' % (b64encode(message.encode("utf-8")).decode("utf-8")))
