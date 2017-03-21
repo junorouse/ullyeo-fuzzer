@@ -5,7 +5,7 @@ from json import loads
 from pprint import pprint
 from urllib.parse import urlparse
 
-from flask import Flask, request
+from flask import Flask, request, render_template
 from flask_socketio import SocketIO
 from flask_sqlalchemy import SQLAlchemy
 from sqlalchemy.exc import IntegrityError
@@ -23,8 +23,12 @@ sites = []
 
 @app.route('/')
 def main():
-    # TODO: implement graphic view
-    return 'hello'
+    return render_template('index.html')
+
+
+@app.route('/detail/<site_name>')
+def detail(site_name):
+    return ''
 
 
 @app.route('/success', methods=['POST'])
@@ -93,4 +97,4 @@ def ws_request(message):
             pass
 
     # module attack
-    system('python handling_module.py "%s" &' % (b64encode(message.encode("utf-8")).decode("utf-8")))
+    system('/Users/pace/.virtualenvs/fuz/bin/python handling_module.py "%s" &' % (b64encode(message.encode("utf-8")).decode("utf-8")))
