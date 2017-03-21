@@ -46,7 +46,6 @@ def detail(site_name):
     s = sha1()
     s.update(site_name.encode("utf-8"))
 
-    # results = AttackSuccess.query.filter_by(hash=s.digest()).all()
     results = db.session.query(AttackSuccess.module_id, func.count(AttackSuccess.module_id)).group_by(AttackSuccess.module_id).all()
     for result in results:
         m = Module.query.get(result[0])
@@ -60,9 +59,19 @@ def detail(site_name):
                            results=results_tmp)
 
 
-@app.route('/detail/<site_name>/<module_name>')
-def detail_attack(site_name, module_name):
-    return '%s - %s' % (site_name, module_name)
+@app.route('/detail/<site_name>/<module_id>')
+def detail_attack(site_name, module_id):
+    s = sha1()
+    s.update(site_name.encode("utf-8"))
+    results = AttackSuccess.query.filter_by(hash=s.digest(), module_id=module_id).all()
+    m = Module.query.get(module_id)
+    detail_module = {
+        'id': module_id,
+        'name': m.name,
+    }
+    return render_template('detail_module.html', results=results,
+                           detail_site_host=site_name,
+                           detail_module=detail_module)
 
 
 @app.route('/success', methods=['POST'])
