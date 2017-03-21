@@ -30,14 +30,14 @@ def go(web_request):
     :return: None
     """
     o = urlparse(web_request['url'])
-    query = parse_qs(o.query)
+    attack_query = parse_qs(o.query)
     url = o._replace(query=None).geturl()
-    for k, v in query.items():
+    for k, v in attack_query.items():
         tmp_value = v
-        query[k] = 'sleep(3)'
+        attack_query[k] = 'sleep(3)'
         a1 = time()
         try:
-            r = get(url, params=query, timeout=5)
+            r = get(url, params=attack_query, timeout=5)
         except exceptions.Timeout:
             r = FakeRequest()
         a2 = time()
@@ -50,8 +50,8 @@ def go(web_request):
                 'module_id': 1,
                 'url': url,
                 'r_type': web_request['type'],
-                'query': dumps(query),
-                'body': dumps(query),
+                'attack_query': dumps(attack_query),
+                'body': dumps(attack_query),
                 'request_headers': dumps(web_request['requestHeaders']),
                 'response_headers': dumps(web_request['responseHeaders']),
                 'response_body': r.content,
@@ -59,4 +59,4 @@ def go(web_request):
             }
             post(urlz, data=data)
 
-        query[k] = tmp_value
+            attack_query[k] = tmp_value

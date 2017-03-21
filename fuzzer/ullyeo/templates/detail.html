@@ -7,34 +7,39 @@
           <a href="/"><h1 class="title is-1">Ullyeo Fuzzer</h1></a>
         </div>
         <div class="column">
+          <h2 class="subtitle">{{ detail_site_host }}</h2>
         </div>
       </div>
-    <hr/>
+      <hr/>
+      Site Scanning Result
+      <hr/>
+
       <table class="table">
         <thead>
           <tr>
             <th><abbr title="Position">Pos</abbr></th>
-            <th>Site Host URL</th>
+            <th>Module Name</th>
             <th>Vuln Count</th>
           </tr>
         </thead>
         <tfoot>
           <tr>
             <th><abbr title="Position">Pos</abbr></th>
-            <th>Site Host URL</th>
+            <th>Module Name</th>
             <th>Vuln Count</th>
           </tr>
         </tfoot>
         <tbody>
-        {% for site in sites %}
+        {% for result in results %}
           <tr>
             <th>{{ loop.index }}</th>
-            <td><a href="/detail/{{ site.host }}">{{ site.host }}</a></td>
-            <th>{{ site.vuln_count }}</th>
+            <td><a href="/detail/{{ detail_site_host }}/{{ result.id }}">{{ result.name }}</a></td>
+            <th>{{ result.count }}</th>
           </tr>
         {% endfor %}
         </tbody>
       </table>
+
     </div>
   </section>
 {% endblock %}}
