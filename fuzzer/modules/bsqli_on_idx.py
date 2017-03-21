@@ -37,22 +37,26 @@ def go(web_request):
         attack_query[k] = 'sleep(3)'
         a1 = time()
         try:
-            r = get(url, params=attack_query, timeout=5)
+            tmp_header = {}
+            for w in web_request['requestHeaders']:
+                tmp_header[w['name']] = w['value']
+
+            r = get(url, params=attack_query, timeout=5, headers=tmp_header)
         except exceptions.Timeout:
             r = FakeRequest()
         a2 = time()
         if a2 - a1 >= 3:
-            print ("OK")
-
+            print(a2 - a1)
             urlz = 'http://localhost:8787/success'
             data = {
                 'request_id': web_request['requestId'],
                 'module_id': 1,
                 'url': url,
+                'r_method': web_request['method'],
                 'r_type': web_request['type'],
                 'attack_query': dumps(attack_query),
                 'body': dumps(attack_query),
-                'request_headers': dumps(web_request['requestHeaders']),
+                'request_headers': dumps(tmp_header),
                 'response_headers': dumps(web_request['responseHeaders']),
                 'response_body': r.content,
                 'response_status': r.status_code,

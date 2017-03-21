@@ -1,9 +1,10 @@
 from time import time
 from base64 import b64encode
 from os import system
-from json import loads
+from json import dumps, loads
 from hashlib import sha1
 from pprint import pprint
+from requests import request as r_request
 from urllib.parse import urlparse
 
 from flask import Flask, request, render_template
@@ -25,7 +26,6 @@ sites = []
 
 @app.route('/')
 def main():
-    a = Module.query.get(1)
     sites = Site.query.all()
     sites_tmp = []
 
@@ -34,7 +34,8 @@ def main():
         tmp['host'] = site.host
         s = sha1()
         s.update(tmp['host'].encode("utf-8"))
-        tmp['vuln_count'] = AttackSuccess.query.filter_by(hash=s.digest()).count()
+        tmp['vuln_count'] = AttackSuccess.query\
+            .filter_by(hash=s.digest()).count()
         sites_tmp.append(tmp)
 
     return render_template('index.html', sites=sites_tmp)
@@ -46,16 +47,20 @@ def detail(site_name):
     s = sha1()
     s.update(site_name.encode("utf-8"))
 
-    results = db.session.query(AttackSuccess.module_id, func.count(AttackSuccess.module_id)).group_by(AttackSuccess.module_id).all()
+    results = db.session.query(AttackSuccess.module_id,
+                               func.count(AttackSuccess.module_id))\
+        .filter_by(hash=s.digest()).group_by(AttackSuccess.module_id).all()
     for result in results:
         m = Module.query.get(result[0])
+        print(result)
         results_tmp.append({
             'id': result[0],
             'name': m.name,
             'count': result[1],
         })
 
-    return render_template('detail.html', detail_site_host=site_name,
+    return render_template('detail.html',
+                           detail_site_host=site_name,
                            results=results_tmp)
 
 
@@ -63,7 +68,8 @@ def detail(site_name):
 def detail_attack(site_name, module_id):
     s = sha1()
     s.update(site_name.encode("utf-8"))
-    results = AttackSuccess.query.filter_by(hash=s.digest(), module_id=module_id).all()
+    results = AttackSuccess.query\
+        .filter_by(hash=s.digest(), module_id=module_id).all()
     m = Module.query.get(module_id)
     detail_module = {
         'id': module_id,
@@ -72,6 +78,30 @@ def detail_attack(site_name, module_id):
     return render_template('detail_module.html', results=results,
                            detail_site_host=site_name,
                            detail_module=detail_module)
+
+
+@app.route('/request_test/<attack_id>', methods=['POST'])
+def request_test(attack_id):
+    msg = {}
+    attack = AttackSuccess.query.get(attack_id)
+    payload = {}
+    payload['url'] = attack.url
+    payload['headers'] = loads(attack.request_headers)
+    payload['method'] = attack.r_method
+    payload['params'] = loads(attack.attack_query)
+    payload['data'] = loads(attack.body)
+    payload['timeout'] = 5
+    try:
+
+        r = r_request(**payload)
+        msg['status'] = r.status_code
+        msg['content'] = r.content.decode('utf-8')
+    except Exception as e:
+        print(e)
+        msg['status'] = '999'
+        msg['content'] = 'timeout'
+
+    return dumps(msg)
 
 
 @app.route('/success', methods=['POST'])
@@ -86,6 +116,7 @@ def success():
     module_id = request.form['module_id']
     url = request.form['url']
     r_type = request.form['r_type']
+    r_method = request.form['r_method']
     attack_query = request.form['attack_query']
     body = request.form['body']
     request_headers = request.form['request_headers']
@@ -97,14 +128,17 @@ def success():
     s = sha1()
     s.update(host.encode("utf-8"))
 
+    print("GOOD")
+
     w = AttackSuccess(module_id=module_id,
-                      url=url, r_type=r_type, attack_query=attack_query, body=body,
+                      r_method=r_method,
+                      url=url, r_type=r_type,
+                      attack_query=attack_query, body=body,
                       request_headers=request_headers,
                       response_headers=response_headers,
                       response_body=response_body,
                       response_status=response_status,
                       hash=s.digest())
-    print(w)
     db.session.add(w)
     db.session.commit()
     return '9ood'
@@ -133,6 +167,7 @@ def ws_request(message):
     host = url.netloc
     try:
         assert sites.index(host) is not None
+
     except ValueError as e:
         # site attack
         sites.append(host)
@@ -144,4 +179,5 @@ def ws_request(message):
             pass
 
     # module attack
-    system('/Users/pace/.virtualenvs/fuz/bin/python handling_module.py "%s" &' % (b64encode(message.encode("utf-8")).decode("utf-8")))
+    system('/Users/pace/.virtualenvs/fuz/bin/python handling_module.py "%s" &'
+           % (b64encode(message.encode("utf-8")).decode("utf-8")))

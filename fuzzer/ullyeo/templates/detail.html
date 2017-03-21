@@ -32,7 +32,7 @@
         <tbody>
         {% for result in results %}
           <tr>
-            <th>{{ loop.index }}</th>
+            <th>{{ result.id }}</th>
             <td><a href="/detail/{{ detail_site_host }}/{{ result.id }}">{{ result.name }}</a></td>
             <th>{{ result.count }}</th>
           </tr>

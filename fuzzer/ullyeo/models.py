@@ -65,6 +65,7 @@ class AttackSuccess(db.Model):
 
     url = db.Column(db.String)
     r_type = db.Column(db.String)
+    r_method = db.Column(db.String)
     attack_query = db.Column(db.String)
     body = db.Column(db.String)
     request_headers = db.Column(db.String)
@@ -75,12 +76,13 @@ class AttackSuccess(db.Model):
 
     hash = db.Column(db.String)
 
-    def __init__(self, module_id, url, r_type,
+    def __init__(self, module_id, url, r_type, r_method,
                  attack_query, body, request_headers, response_headers,
                  response_body, response_status, hash):
         self.module_id = module_id
         self.url = url
         self.r_type = r_type
+        self.r_method = r_method
         self.attack_query = attack_query
         self.body = body
         self.request_headers = request_headers
