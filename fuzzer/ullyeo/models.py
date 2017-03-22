@@ -52,18 +52,21 @@ class Module(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String)
 
+    def __init__(self, id, name):
+        self.id = id
+        self.name = name
+
 
 class AttackSuccess(db.Model):
     __tablename__ = 'attack_successes'
     id = db.Column(db.Integer, primary_key=True)
-    request_id = db.Column(db.Integer, db.ForeignKey('requests.id'))
-    request = db.relationship('Request', foreign_keys=[request_id])
     module_id = db.Column(db.Integer, db.ForeignKey('modules.id'))
     module = db.relationship('Module', foreign_keys=[module_id])
 
     url = db.Column(db.String)
     r_type = db.Column(db.String)
-    query = db.Column(db.String)
+    r_method = db.Column(db.String)
+    attack_query = db.Column(db.String)
     body = db.Column(db.String)
     request_headers = db.Column(db.String)
 
@@ -71,19 +74,22 @@ class AttackSuccess(db.Model):
     response_body = db.Column(db.String)
     response_status = db.Column(db.Integer)
 
-    def __init__(self, request_id, module_id, url, r_type,
-                 query, body, request_headers, response_headers,
-                 response_body, response_status):
-        self.request_id = request_id
+    hash = db.Column(db.String)
+
+    def __init__(self, module_id, url, r_type, r_method,
+                 attack_query, body, request_headers, response_headers,
+                 response_body, response_status, hash):
         self.module_id = module_id
         self.url = url
         self.r_type = r_type
-        self.query = query
+        self.r_method = r_method
+        self.attack_query = attack_query
         self.body = body
         self.request_headers = request_headers
         self.response_headers = response_headers
         self.response_body = response_body
         self.response_status = response_status
+        self.hash = hash
 
 
 class Site(db.Model):
@@ -96,3 +102,14 @@ class Site(db.Model):
         s.update(host.encode("utf-8"))
         self.hash = s.digest()
         self.host = host
+
+
+class SiteIsScan(db.Model):
+    __tablename__ = 'site_is_scans'
+    id = db.Column(db.Integer, primary_key=True)
+    hash = db.Column(db.String)
+    pid = db.Column(db.Integer)
+
+    def __init__(self, hash, pid):
+        self.hash = hash
+        self.pid = pid

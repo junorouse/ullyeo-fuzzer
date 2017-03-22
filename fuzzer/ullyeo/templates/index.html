@@ -1,0 +1,42 @@
+{% extends 'base.html' %}
+{% block content %}
+<section class="section">
+  <div class="container">
+      <div class="columns">
+        <div class="column is-3">
+          <a href="/"><h1 class="title is-1">Ullyeo Fuzzer</h1></a>
+        </div>
+        <div class="column">
+        </div>
+      </div>
+    <hr/>
+    <a class="button is-black" href="/delete/no_vuln">Delete sites that don't have vulnerability</a>
+    <hr/>
+      <table class="table">
+        <thead>
+          <tr>
+            <th><abbr title="Position">Pos</abbr></th>
+            <th>Site Host URL</th>
+            <th>Vuln Count</th>
+          </tr>
+        </thead>
+        <tfoot>
+          <tr>
+            <th><abbr title="Position">Pos</abbr></th>
+            <th>Site Host URL</th>
+            <th>Vuln Count</th>
+          </tr>
+        </tfoot>
+        <tbody>
+        {% for site in sites %}
+          <tr>
+            <th>{{ loop.index }}</th>
+            <td><a href="/detail/{{ site.host }}">{{ site.host }}</a></td>
+            <th>{{ site.vuln_count }}</th>
+          </tr>
+        {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </section>
+{% endblock %}}

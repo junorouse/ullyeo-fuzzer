@@ -1,0 +1,179 @@
+{% extends 'base.html' %}
+{% block content %}
+<div class="box" id="detail-box">
+</div>
+<style>
+  #detail-box {
+    position: absolute;
+    width: 500px;
+    height: auto;
+    z-index: 1;
+    overflow-y: scroll;
+    word-wrap: break-word;
+    display: none;
+  }
+  #result-box {
+    height: 500px;
+    overflow-y: scroll;
+    word-wrap: break-word;
+  }
+  #result-content-box {
+    height: auto;
+    overflow-y: scroll;
+    word-wrap: break-word;
+  }
+  #result-header {
+    padding: 1.2em;
+  }
+  .spin-spin {
+    line-height: 25px;
+    -webkit-animation-name: spin;
+    -webkit-animation-duration: 1000ms;
+    -webkit-animation-iteration-count: infinite;
+    -webkit-animation-timing-function: linear;
+    -moz-animation-name: spin;
+    -moz-animation-duration: 1000ms;
+    -moz-animation-iteration-count: infinite;
+    -moz-animation-timing-function: linear;
+    -ms-animation-name: spin;
+    -ms-animation-duration: 1000ms;
+    -ms-animation-iteration-count: infinite;
+    -ms-animation-timing-function: linear;
+
+    animation-name: spin;
+    animation-duration: 1000ms;
+    animation-iteration-count: infinite;
+    animation-timing-function: linear;
+}
+@-ms-keyframes spin {
+    from { -ms-transform: rotate(0deg); }
+    to { -ms-transform: rotate(360deg); }
+}
+@-moz-keyframes spin {
+    from { -moz-transform: rotate(0deg); }
+    to { -moz-transform: rotate(360deg); }
+}
+@-webkit-keyframes spin {
+    from { -webkit-transform: rotate(0deg); }
+    to { -webkit-transform: rotate(360deg); }
+}
+@keyframes spin {
+    from {
+        transform:rotate(0deg);
+    }
+    to {
+        transform:rotate(360deg);
+    }
+}
+</style>
+<section class="section">
+  <div class="container">
+      <div class="columns">
+        <div class="column is-3">
+          <a href="/"><h1 class="title is-1">Ullyeo Fuzzer</h1></a>
+        </div>
+        <div class="column is-5">
+          <a href="/detail/{{ detail_site_host }}"><h2 class="subtitle">{{ detail_site_host }}</h2></a>
+        </div>
+        <div class="column">
+          <h2 class="subtitle">{{ detail_module.name }}</h2>
+        </div>
+      </div>
+      <hr/>
+      <div class="box is-12" id="result-box">
+        <div id="result-header">
+          status: <span id="result-status"></span>
+        </div>
+        <div class="box is-12" id="result-content-box">
+        </div>
+      </div>
+      <hr/>
+      <table class="table">
+        <thead>
+          <tr>
+            <th><abbr title="Position">Pos</abbr></th>
+            <th>method</th>
+            <th>url</th>
+            <th>attack_query</th>
+            <th>attack_body</th>
+            <th>request_headers</th>
+            <th>response_body</th>
+            <th>test</th>
+          </tr>
+        </thead>
+        <tfoot>
+          <tr>
+            <th><abbr title="Position">Pos</abbr></th>
+            <th>method</th>
+            <th>url</th>
+            <th>attack_query</th>
+            <th>attack_body</th>
+            <th>request_headers</th>
+            <th>response_body</th>
+            <th>test</th>
+          </tr>
+        </tfoot>
+        <tbody>
+        {% for result in results %}
+          <tr>
+            <th>{{ result.id }}</th>
+            <td>{{ result.r_method }}</td>
+            <td>{{ result.url }}</td>
+            <td class="detail-view" data="{{ result.attack_query }}">More <i class="fa fa-search-plus" aria-hidden="true" style="line-height: 25px;"></i></td>
+            <td class="detail-view" data="{{ result.body }}">More <i class="fa fa-search-plus" aria-hidden="true" style="line-height: 25px;"></i></td>
+            <td class="detail-view" data="{{ result.request_headers }}">More <i class="fa fa-search-plus" aria-hidden="true" style="line-height: 25px;"></i></td>
+            <td class="detail-view" data="{{ result.response_body }}">More <i class="fa fa-search-plus" aria-hidden="true" style="line-height: 25px;"></i></td>
+            <td><a class="button is-info go-test">Go</a></td>
+          </tr>
+        {% endfor %}
+        </tbody>
+      </table>
+
+    </div>
+  </section>
+<script
+  src="https://code.jquery.com/jquery-3.2.1.min.js"
+  integrity="sha256-hwg4gsxgFZhOsEEamdOYGBf13FyQuiTwlAQgxVSNgt4="
+  crossorigin="anonymous"></script>
+<script>
+  // TODO: if clicked -> do not disappear
+  // TODO: if go clicked do request test
+  var dt = $('td.detail-view');
+  dt.mouseover(function(e) {
+    var target = $(e.target);
+    var data = target.attr('data');
+    var offset = target.offset();
+    if (offset.left+500 > $(window).width()) {
+      offset.left = offset.left - 500 - (offset.left+500 - $(window).width()) + 110;
+    }
+    var db = $('#detail-box');
+    db.css('top', offset.top+60);
+    db.css('left', offset.left);
+    db.css('display', 'block');
+    db.text(data);
+  });
+
+  dt.mouseout(function() {
+    var db = $('#detail-box');
+    db.css('display', 'none');
+  });
+
+  x = '';
+  $('.go-test').click(function(e) {
+    var target = $(e.target);
+    var attackId = target.parent().parent().children()[0].innerText;
+    $('#result-status').html('<i class="fa fa-spinner spin-spin" aria-hidden="true"></i>');
+    $.ajax({
+      type: 'post',
+      url: '/request_test/'+attackId,
+      success: function(data) {
+        var d = JSON.parse(data);
+        $('#result-status').text(d.status);
+        $('#result-content-box').text(d.content);
+      }
+    })
+  });
+
+
+</script>
+{% endblock %}}

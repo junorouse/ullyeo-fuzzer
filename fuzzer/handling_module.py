@@ -8,6 +8,8 @@ gevent.monkey.patch_all()
 import gevent
 
 import config
+from os import getpid
+from requests import post
 
 
 def fetch(module):
@@ -25,5 +27,18 @@ def asynchronous():
 
 x = sys.argv[1]
 x = b64decode(x).decode("utf-8")
+host = sys.argv[2]
+host = b64decode(host).decode("utf-8")
+pid = getpid()
+
+data = {
+    'host': host,
+    'pid': str(pid),
+}
+
+post('http://localhost:8787/add', data=data)
+
 message = loads(x)
 asynchronous()
+
+post('http://localhost:8787/delete', data=data)

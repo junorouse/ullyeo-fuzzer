@@ -1,30 +1,152 @@
-from time import time
 from base64 import b64encode
 from os import system
-from json import loads
-from pprint import pprint
+from json import dumps, loads
+from hashlib import sha1
+from requests import request as r_request
 from urllib.parse import urlparse
 
-from flask import Flask, request
+from flask import Flask, request, render_template, redirect
 from flask_socketio import SocketIO
 from flask_sqlalchemy import SQLAlchemy
+from sqlalchemy import func
 from sqlalchemy.exc import IntegrityError
 
 app = Flask(__name__)
-app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///databases/db' +\
-                                        str(int(time())) + '.sqlite3'
+app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///databases/db.sqlite3'
+
 ws = SocketIO(app)
 db = SQLAlchemy(app)
 
-from .models import AttackSuccess, Site
+from .models import AttackSuccess, Site, Module, SiteIsScan
 
-sites = []
+sites_list = []
 
 
 @app.route('/')
 def main():
-    # TODO: implement graphic view
-    return 'hello'
+    sites = Site.query.all()
+    sites_tmp = []
+
+    for site in sites:
+        tmp = {}
+        tmp['host'] = site.host
+        s = sha1()
+        s.update(tmp['host'].encode("utf-8"))
+        tmp['vuln_count'] = AttackSuccess.query\
+            .filter_by(hash=s.digest()).count()
+        sites_tmp.append(tmp)
+
+    return render_template('index.html', sites=sites_tmp)
+
+
+@app.route('/detail/<site_name>')
+def detail(site_name):
+    results_tmp = []
+    s = sha1()
+    s.update(site_name.encode("utf-8"))
+
+    results = db.session.query(AttackSuccess.module_id,
+                               func.count(AttackSuccess.module_id))\
+        .filter_by(hash=s.digest()).group_by(AttackSuccess.module_id).all()
+    for result in results:
+        m = Module.query.get(result[0])
+        print(result)
+        results_tmp.append({
+            'id': result[0],
+            'name': m.name,
+            'count': result[1],
+        })
+
+    return render_template('detail.html',
+                           detail_site_host=site_name,
+                           results=results_tmp)
+
+
+@app.route('/detail/<site_name>/<module_id>')
+def detail_attack(site_name, module_id):
+    s = sha1()
+    s.update(site_name.encode("utf-8"))
+    results = AttackSuccess.query\
+        .filter_by(hash=s.digest(), module_id=module_id).all()
+    m = Module.query.get(module_id)
+    detail_module = {
+        'id': module_id,
+        'name': m.name,
+    }
+    return render_template('detail_module.html', results=results,
+                           detail_site_host=site_name,
+                           detail_module=detail_module)
+
+
+@app.route('/request_test/<attack_id>', methods=['POST'])
+def request_test(attack_id):
+    msg = {}
+    attack = AttackSuccess.query.get(attack_id)
+    payload = {}
+    payload['url'] = attack.url
+    payload['headers'] = loads(attack.request_headers)
+    payload['method'] = attack.r_method
+    payload['params'] = loads(attack.attack_query)
+    payload['data'] = loads(attack.body)
+    payload['timeout'] = 5
+    try:
+
+        r = r_request(**payload)
+        msg['status'] = r.status_code
+        msg['content'] = r.content.decode('utf-8')
+    except Exception as e:
+        print(e)
+        msg['status'] = '999'
+        msg['content'] = 'timeout'
+
+    return dumps(msg)
+
+
+@app.route('/add', methods=['POST'])
+def add():
+    host = request.form['host']
+    pid = request.form['pid']
+    s = sha1()
+    s.update(host.encode("utf-8"))
+    sis = SiteIsScan(s.digest(), pid)
+    db.session.add(sis)
+    db.session.commit()
+    return 'x'
+
+
+@app.route('/delete', methods=['POST'])
+def delete():
+    host = request.form['host']
+    pid = request.form['pid']
+    s = sha1()
+    s.update(host.encode("utf-8"))
+    sis = SiteIsScan.query.filter_by(hash=s.digest(), pid=pid)
+    db.session.delete(sis[0])
+    db.session.commit()
+    return 'x'
+
+
+@app.route('/delete/no_vuln')
+def delete_no_vuln():
+    global sites_list
+    sites = Site.query.all()
+
+    for site in sites:
+        s = sha1()
+        s.update(site.host.encode("utf-8"))
+        tmp_count = AttackSuccess.query \
+            .filter_by(hash=s.digest()).count()
+        if tmp_count == 0:
+            is_scan = SiteIsScan.query.filter_by(hash=s.digest()).count()
+            if is_scan == 0:
+                try:
+                    sites_list.remove(site.host)
+                except:
+                    pass
+                db.session.delete(site)
+    db.session.commit()
+
+    return redirect('/')
 
 
 @app.route('/success', methods=['POST'])
@@ -36,24 +158,32 @@ def success():
     (int) module_id
     :return: None
     """
-    request_id = request.form['request_id']
     module_id = request.form['module_id']
     url = request.form['url']
     r_type = request.form['r_type']
-    query = request.form['query']
+    r_method = request.form['r_method']
+    attack_query = request.form['attack_query']
     body = request.form['body']
     request_headers = request.form['request_headers']
     response_headers = request.form['response_headers']
     response_body = request.form['response_body']
     response_status = request.form['response_status']
+    url_tmp = urlparse(url)
+    host = url_tmp.netloc
+    s = sha1()
+    s.update(host.encode("utf-8"))
 
-    w = AttackSuccess(request_id=request_id, module_id=module_id,
-                      url=url, r_type=r_type, query=query, body=body,
+    print("GOOD")
+
+    w = AttackSuccess(module_id=module_id,
+                      r_method=r_method,
+                      url=url, r_type=r_type,
+                      attack_query=attack_query, body=body,
                       request_headers=request_headers,
                       response_headers=response_headers,
                       response_body=response_body,
-                      response_status=response_status)
-    print(w)
+                      response_status=response_status,
+                      hash=s.digest())
     db.session.add(w)
     db.session.commit()
     return '9ood'
@@ -75,16 +205,19 @@ def ws_request(message):
     :param message: chrome request object
     :return:
     """
-    global sites
+    global sites_list
 
     r = loads(message)
     url = urlparse(r['url'])
     host = url.netloc
+    s = sha1()
+    s.update(host.encode("utf-8"))
     try:
-        assert sites.index(host) is not None
+        assert sites_list.index(host) is not None
+        # do site scanning
     except ValueError as e:
         # site attack
-        sites.append(host)
+        sites_list.append(host)
         s = Site(host=host)
         db.session.add(s)
         try:
@@ -92,5 +225,10 @@ def ws_request(message):
         except IntegrityError:
             pass
 
+    """
+    If site is scanning that don't delete.
+    """
     # module attack
-    system('python handling_module.py "%s" &' % (b64encode(message.encode("utf-8")).decode("utf-8")))
+    system('/Users/pace/.virtualenvs/fuz/bin/python handling_module.py "%s" "%s" &'
+           % (b64encode(message.encode("utf-8")).decode("utf-8"),
+              b64encode(host.encode("utf-8")).decode("utf-8")))

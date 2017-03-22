@@ -1,0 +1,45 @@
+{% extends 'base.html' %}
+{% block content %}
+<section class="section">
+  <div class="container">
+      <div class="columns">
+        <div class="column is-3">
+          <a href="/"><h1 class="title is-1">Ullyeo Fuzzer</h1></a>
+        </div>
+        <div class="column">
+          <a href="/detail/{{ detail_site_host }}"><h2 class="subtitle">{{ detail_site_host }}</h2></a>
+        </div>
+      </div>
+      <hr/>
+      Site Scanning Result
+      <hr/>
+
+      <table class="table">
+        <thead>
+          <tr>
+            <th><abbr title="Position">Pos</abbr></th>
+            <th>Module Name</th>
+            <th>Vuln Count</th>
+          </tr>
+        </thead>
+        <tfoot>
+          <tr>
+            <th><abbr title="Position">Pos</abbr></th>
+            <th>Module Name</th>
+            <th>Vuln Count</th>
+          </tr>
+        </tfoot>
+        <tbody>
+        {% for result in results %}
+          <tr>
+            <th>{{ result.id }}</th>
+            <td><a href="/detail/{{ detail_site_host }}/{{ result.id }}">{{ result.name }}</a></td>
+            <th>{{ result.count }}</th>
+          </tr>
+        {% endfor %}
+        </tbody>
+      </table>
+
+    </div>
+  </section>
+{% endblock %}}
