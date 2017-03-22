@@ -50,7 +50,7 @@ def go(web_request):
             urlz = 'http://localhost:8787/success'
             data = {
                 'request_id': web_request['requestId'],
-                'module_id': 1,
+                'module_id': 17384,
                 'url': url,
                 'r_method': web_request['method'],
                 'r_type': web_request['type'],

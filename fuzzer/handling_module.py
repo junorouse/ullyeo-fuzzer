@@ -21,7 +21,7 @@ def fetch(module):
 def asynchronous():
     threads = []
     for module in config.MODULE_LIST:
-        threads.append(gevent.spawn(fetch, module))
+        threads.append(gevent.spawn(fetch, module[1]))
     gevent.joinall(threads)
 
 
