@@ -1,27 +1,25 @@
-from time import time
 from base64 import b64encode
 from os import system
 from json import dumps, loads
 from hashlib import sha1
-from pprint import pprint
 from requests import request as r_request
 from urllib.parse import urlparse
 
-from flask import Flask, request, render_template
+from flask import Flask, request, render_template, redirect
 from flask_socketio import SocketIO
 from flask_sqlalchemy import SQLAlchemy
 from sqlalchemy import func
 from sqlalchemy.exc import IntegrityError
 
 app = Flask(__name__)
-app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///databases/db' +\
-                                        str(int(time())) + '.sqlite3'
+app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///databases/db.sqlite3'
+
 ws = SocketIO(app)
 db = SQLAlchemy(app)
 
-from .models import AttackSuccess, Site, Module
+from .models import AttackSuccess, Site, Module, SiteIsScan
 
-sites = []
+sites_list = []
 
 
 @app.route('/')
@@ -104,6 +102,53 @@ def request_test(attack_id):
     return dumps(msg)
 
 
+@app.route('/add', methods=['POST'])
+def add():
+    host = request.form['host']
+    pid = request.form['pid']
+    s = sha1()
+    s.update(host.encode("utf-8"))
+    sis = SiteIsScan(s.digest(), pid)
+    db.session.add(sis)
+    db.session.commit()
+    return 'x'
+
+
+@app.route('/delete', methods=['POST'])
+def delete():
+    host = request.form['host']
+    pid = request.form['pid']
+    s = sha1()
+    s.update(host.encode("utf-8"))
+    sis = SiteIsScan.query.filter_by(hash=s.digest(), pid=pid)
+    db.session.delete(sis[0])
+    db.session.commit()
+    return 'x'
+
+
+@app.route('/delete/no_vuln')
+def delete_no_vuln():
+    global sites_list
+    sites = Site.query.all()
+
+    for site in sites:
+        s = sha1()
+        s.update(site.host.encode("utf-8"))
+        tmp_count = AttackSuccess.query \
+            .filter_by(hash=s.digest()).count()
+        if tmp_count == 0:
+            is_scan = SiteIsScan.query.filter_by(hash=s.digest()).count()
+            if is_scan == 0:
+                try:
+                    sites_list.remove(site.host)
+                except:
+                    pass
+                db.session.delete(site)
+    db.session.commit()
+
+    return redirect('/')
+
+
 @app.route('/success', methods=['POST'])
 def success():
     """
@@ -160,17 +205,19 @@ def ws_request(message):
     :param message: chrome request object
     :return:
     """
-    global sites
+    global sites_list
 
     r = loads(message)
     url = urlparse(r['url'])
     host = url.netloc
+    s = sha1()
+    s.update(host.encode("utf-8"))
     try:
-        assert sites.index(host) is not None
-
+        assert sites_list.index(host) is not None
+        # do site scanning
     except ValueError as e:
         # site attack
-        sites.append(host)
+        sites_list.append(host)
         s = Site(host=host)
         db.session.add(s)
         try:
@@ -178,6 +225,10 @@ def ws_request(message):
         except IntegrityError:
             pass
 
+    """
+    If site is scanning that don't delete.
+    """
     # module attack
-    system('/Users/pace/.virtualenvs/fuz/bin/python handling_module.py "%s" &'
-           % (b64encode(message.encode("utf-8")).decode("utf-8")))
+    system('/Users/pace/.virtualenvs/fuz/bin/python handling_module.py "%s" "%s" &'
+           % (b64encode(message.encode("utf-8")).decode("utf-8"),
+              b64encode(host.encode("utf-8")).decode("utf-8")))

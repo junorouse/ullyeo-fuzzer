@@ -102,3 +102,14 @@ class Site(db.Model):
         s.update(host.encode("utf-8"))
         self.hash = s.digest()
         self.host = host
+
+
+class SiteIsScan(db.Model):
+    __tablename__ = 'site_is_scans'
+    id = db.Column(db.Integer, primary_key=True)
+    hash = db.Column(db.String)
+    pid = db.Column(db.Integer)
+
+    def __init__(self, hash, pid):
+        self.hash = hash
+        self.pid = pid
