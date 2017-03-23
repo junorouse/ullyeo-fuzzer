@@ -138,12 +138,26 @@ def delete_no_vuln():
             .filter_by(hash=s.digest()).count()
         if tmp_count == 0:
             is_scan = SiteIsScan.query.filter_by(hash=s.digest()).count()
+            print(site.host, tmp_count, is_scan)
             if is_scan == 0:
                 try:
                     sites_list.remove(site.host)
-                except:
-                    pass
+                except Exception as e:
+                    print(e)
                 db.session.delete(site)
+    db.session.commit()
+
+    return redirect('/')
+
+
+@app.route('/delete/process')
+def delete_process():
+    global sites_list
+    is_scans = SiteIsScan.query.all()
+    for is_scan in is_scans:
+        system('kill -9 %d' % (int(is_scan.pid)))
+        db.session.delete(is_scan)
+
     db.session.commit()
 
     return redirect('/')
@@ -214,7 +228,6 @@ def ws_request(message):
     s.update(host.encode("utf-8"))
     try:
         assert sites_list.index(host) is not None
-        # do site scanning
     except ValueError as e:
         # site attack
         sites_list.append(host)
@@ -222,6 +235,8 @@ def ws_request(message):
         db.session.add(s)
         try:
             db.session.commit()
+            # system('/Users/pace/.virtualenvs/fuz/bin/python handling_site_module.py "%s" &'
+            #        % b64encode(host.encode("utf-8")).decode("utf-8"))
         except IntegrityError:
             pass
 

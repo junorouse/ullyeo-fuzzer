@@ -18,7 +18,7 @@
     word-wrap: break-word;
   }
   #result-content-box {
-    height: auto;
+    height: 400px;
     overflow-y: scroll;
     word-wrap: break-word;
   }
@@ -85,6 +85,7 @@
           status: <span id="result-status"></span>
         </div>
         <div class="box is-12" id="result-content-box">
+          <iframe id="result-content-box-iframe" style="width: 100%; height: 100%;"></iframe>
         </div>
       </div>
       <hr/>
@@ -169,11 +170,11 @@
       success: function(data) {
         var d = JSON.parse(data);
         $('#result-status').text(d.status);
-        $('#result-content-box').text(d.content);
+//        $('#result-content-box').text(d.content);
+        document.getElementById('result-content-box-iframe').src = "data:text/html;charset=utf-8," + escape(d.content);
       }
     })
   });
-
 
 </script>
 {% endblock %}}
