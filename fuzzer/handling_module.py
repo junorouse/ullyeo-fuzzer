@@ -20,7 +20,9 @@ def fetch(module):
 
 def asynchronous():
     threads = []
+    print("\033[91m>--------------------------------------------------------------------------------------<\033[37m")
     for module in config.MODULE_LIST:
+        print("\033[36m"+module[1]+"\033[37m")
         threads.append(gevent.spawn(fetch, module[1]))
     gevent.joinall(threads)
 
