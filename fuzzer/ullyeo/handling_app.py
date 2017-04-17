@@ -36,7 +36,8 @@ def main():
             .filter_by(hash=s.digest()).count()
         sites_tmp.append(tmp)
 
-    return render_template('index.html', sites=sites_tmp)
+    return render_template('index.html', sites=sites_tmp,
+                           title="index")
 
 
 @app.route('/detail/<site_name>')
@@ -59,7 +60,8 @@ def detail(site_name):
 
     return render_template('detail.html',
                            detail_site_host=site_name,
-                           results=results_tmp)
+                           results=results_tmp,
+                           title="%s" % (site_name))
 
 
 @app.route('/detail/<site_name>/<module_id>')
@@ -75,7 +77,8 @@ def detail_attack(site_name, module_id):
     }
     return render_template('detail_module.html', results=results,
                            detail_site_host=site_name,
-                           detail_module=detail_module)
+                           detail_module=detail_module,
+                           title="%s - %s" % (site_name, m.name))
 
 
 @app.route('/request_test/<attack_id>', methods=['POST'])
@@ -138,12 +141,26 @@ def delete_no_vuln():
             .filter_by(hash=s.digest()).count()
         if tmp_count == 0:
             is_scan = SiteIsScan.query.filter_by(hash=s.digest()).count()
+            print(site.host, tmp_count, is_scan)
             if is_scan == 0:
                 try:
                     sites_list.remove(site.host)
-                except:
-                    pass
+                except Exception as e:
+                    print(e)
                 db.session.delete(site)
+    db.session.commit()
+
+    return redirect('/')
+
+
+@app.route('/delete/process')
+def delete_process():
+    global sites_list
+    is_scans = SiteIsScan.query.all()
+    for is_scan in is_scans:
+        system('kill -9 %d' % (int(is_scan.pid)))
+        db.session.delete(is_scan)
+
     db.session.commit()
 
     return redirect('/')
@@ -207,14 +224,20 @@ def ws_request(message):
     """
     global sites_list
 
+    print("\033[34m>--------------------------------------------------------------------------------------<\033[37m")
+
     r = loads(message)
     url = urlparse(r['url'])
     host = url.netloc
     s = sha1()
     s.update(host.encode("utf-8"))
+
+    print("\033[33mhost: %s\033[37m" % host)
+    print("\033[33mhash: (0x%s)\033[37m" % s.hexdigest())
+    print(message)
+
     try:
         assert sites_list.index(host) is not None
-        # do site scanning
     except ValueError as e:
         # site attack
         sites_list.append(host)
@@ -222,6 +245,8 @@ def ws_request(message):
         db.session.add(s)
         try:
             db.session.commit()
+            # system('/Users/pace/.virtualenvs/fuz/bin/python handling_site_module.py "%s" &'
+            #        % b64encode(host.encode("utf-8")).decode("utf-8"))
         except IntegrityError:
             pass
 

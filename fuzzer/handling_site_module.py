@@ -13,24 +13,21 @@ from requests import post
 
 
 def fetch(module):
-    global message
-    m = importlib.import_module('modules.'+module)
-    m.go(message)
+    global host
+    m = importlib.import_module('site_modules.'+module)
+    m.go(host)
 
 
 def asynchronous():
     threads = []
-    print("\033[91m>--------------------------------------------------------------------------------------<\033[37m")
-    for module in config.MODULE_LIST:
-        print("\033[36m"+module[1]+"\033[37m")
+    for module in config.SITE_MODULE_LIST:
         threads.append(gevent.spawn(fetch, module[1]))
     gevent.joinall(threads)
 
 
-x = sys.argv[1]
-x = b64decode(x).decode("utf-8")
-host = sys.argv[2]
+host = sys.argv[1]
 host = b64decode(host).decode("utf-8")
+
 pid = getpid()
 
 data = {
@@ -40,7 +37,6 @@ data = {
 
 post('http://localhost:8787/add', data=data)
 
-message = loads(x)
 asynchronous()
 
 post('http://localhost:8787/delete', data=data)

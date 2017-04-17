@@ -36,6 +36,7 @@ def go(web_request):
         tmp_value = v
         attack_query[k] = 'sleep(3)'
         a1 = time()
+        print(attack_query)
         try:
             tmp_header = {}
             for w in web_request['requestHeaders']:
@@ -46,6 +47,19 @@ def go(web_request):
             r = FakeRequest()
         a2 = time()
         if a2 - a1 >= 3:
+            ss = """\033[36m
+
+              _____            _       _ _     _
+             | ____|_  ___ __ | | ___ (_) |_  | |
+             |  _| \ \/ / '_ \| |/ _ \| | __| | |
+             | |___ >  <| |_) | | (_) | | |_  |_|
+             |_____/_/\_\ .__/|_|\___/|_|\__| (_)
+                        |_|
+
+            \033[37m"""
+
+            print(ss)
+
             print(a2 - a1)
             urlz = 'http://localhost:8787/success'
             data = {
