@@ -254,6 +254,6 @@ def ws_request(message):
     If site is scanning that don't delete.
     """
     # module attack
-    system('/Users/pace/.virtualenvs/fuz/bin/python handling_module.py "%s" "%s" &'
+    system('/usr/bin/env python handling_module.py "%s" "%s" &'
            % (b64encode(message.encode("utf-8")).decode("utf-8"),
               b64encode(host.encode("utf-8")).decode("utf-8")))
