@@ -9,7 +9,7 @@ Flask-SocketIO==3.3.2
 Flask-SQLAlchemy==2.3.2
 idna==2.8
 itsdangerous==1.1.0
-Jinja2==2.10.1
+Jinja2==2.11.3
 MarkupSafe==1.1.1
 mccabe==0.6.1
 packaging==19.0
